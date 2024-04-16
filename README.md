@@ -14,3 +14,4 @@ Using OpenCV, GPT4-Vision, and TTS to create narration of a video
 ---
 ### Video Creation
 Using DALLE and OpenAI Whisper to create videos
+# TutorialGenerator
