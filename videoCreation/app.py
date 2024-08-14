@@ -6,6 +6,14 @@ from io import StringIO
 import os
 import script
 from time import sleep
+import logging
+
+
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 st.set_page_config(page_title='Text-to-Video', page_icon='🎥')
 base_path = os.environ.get('OPENAI_SANDBOX_BASE_PATH', '')
@@ -76,7 +84,7 @@ st.markdown(f"""
     }}
 
 </style>
-<p class='caption-style' style='font-size: 24px; color: black;'>Create recipe videos using OpenAI</p>
+<p class='caption-style' style='font-size: 24px; color: black;'>Generate tutorials to diagnose car problems</p>
 """, unsafe_allow_html=True)
 
 
@@ -87,8 +95,8 @@ download_placeholder = st.empty()
 
 recipes = st.sidebar.selectbox(
     "Choose a generated recipe, or create your own!",
-    (None, "Stuffed Cabbage", 'Eggs Benedict', "Indian Butter Chicken", 'Moroccan Cous Cous', "Fajitas", "Chinese Chicken", 'Popcorn stove top', "Who was the first US president?", 'Birria Tacos',"Homeade Jam", 'Falafel', 'goat cheese salad', 'Steak au Poivre'),
-    format_func=lambda x: "Choose from the cookbook" if x is None else x
+    (None, "Dead Battery", 'Alternator', "Flat Tire", 'Iginition', "Overheating"),
+    format_func=lambda x: "Common Problems" if x is None else x
 )
 
 
@@ -124,27 +132,28 @@ if len(api_key) > 40:
             loading_message.markdown("<h3 style='color: black;'>Your video is in the oven...</h3>", unsafe_allow_html=True)
             try:
                 success, recipe_name = script.run(requested_recipe, api_key)
+                st.write(str(recipe_name))
             except Exception as e:
-                 pass
+                st.error("not successful")
             
-            if not success:
-                  loading_message = st.empty() 
-                  loading_message.markdown("<h3 style='color: black;'>Try again, all the chefs are busy</h3>", unsafe_allow_html=True)
-            elif success:
+            # if not success:
+            #       loading_message = st.empty() 
+            #       loading_message.markdown("<h3 style='color: black;'>Try again, all the chefs are busy</h3>", unsafe_allow_html=True)
+            # elif success:
                 # if recipe_name is not None:
-                path = os.path.join(recipe_name, 'video.mp4')
-                video_file = open(path, 'rb')
+            path = os.path.join(recipe_name, 'video.mp4')
+            video_file = open(path, 'rb')
+            video_bytes = video_file.read()
+            
+            loading_message.empty()  
+            
+            
+            with open(path, 'rb') as video_file:
                 video_bytes = video_file.read()
-                
-                loading_message.empty()  
-                
-              
-                with open(path, 'rb') as video_file:
-                    video_bytes = video_file.read()
-                video_placeholder.video(video_bytes)
+            video_placeholder.video(video_bytes)
 
-                download_placeholder.download_button(label="Download Video",
-                                   data=video_bytes,
-                                   file_name=f"{recipe_name}.mp4",
-                                   mime='video/mp4',
-                                    key='download_custom_recipes')
+            download_placeholder.download_button(label="Download Video",
+                                data=video_bytes,
+                                file_name=f"{recipe_name}.mp4",
+                                mime='video/mp4',
+                                key='download_custom_recipes')
