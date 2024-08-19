@@ -7,8 +7,10 @@ from elevenlabs import play, stream, save
 import subprocess
 import random
 import requests
+import logging
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 elevenlabs_key = os.environ.get("ELEVENLABS_API_KEY")
 
@@ -42,7 +44,7 @@ def parse(narration):
     return output
     
 def create(data, name, output_folder, api_key):
-
+    logging.info('creating narration')
     narration_file_path = os.path.join(name, output_folder)
     if not os.path.exists(narration_file_path):
         os.makedirs(narration_file_path)
@@ -54,7 +56,7 @@ def create(data, name, output_folder, api_key):
         
         n += 1
         output_file = os.path.join(narration_file_path, f'narration_{n}.mp3')
-
+        
         if narration_api == 'openai':
             openai.api_key = api_key
             audio = openai.audio.speech.create(
